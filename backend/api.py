@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 import mediapipe as mp
 import copy
+import csv
 import itertools
 from collections import Counter, deque
 
