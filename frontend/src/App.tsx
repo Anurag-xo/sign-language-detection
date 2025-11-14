@@ -9,7 +9,7 @@ import { SettingsPage } from './pages/Settings'
 function App() {
   return (
     <Router>
-      <div className="bg-gray-900 text-white min-h-screen flex flex-col">
+      <div className="flex min-h-screen flex-col bg-gray-900 text-white">
         <Header />
         <main className="flex-grow">
           <Routes>

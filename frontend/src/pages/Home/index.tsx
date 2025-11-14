@@ -2,16 +2,16 @@ import { Link } from 'react-router-dom'
 
 export function HomePage() {
   return (
-    <div className="flex flex-col items-center justify-center text-center flex-grow">
-      <h1 className="text-5xl font-bold mb-4">
+    <div className="flex flex-grow flex-col items-center justify-center text-center">
+      <h1 className="mb-4 text-5xl font-bold">
         Real-time Sign Language Detection
       </h1>
-      <p className="text-xl mb-8">
+      <p className="mb-8 text-xl">
         Use your camera to detect sign language gestures in real-time.
       </p>
       <Link
         to="/demo"
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
       >
         Start Demo
       </Link>
