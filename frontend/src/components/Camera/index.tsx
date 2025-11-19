@@ -1,53 +1,67 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react'
 
 interface CameraProps {
-  onFrame: (video: HTMLVideoElement) => void;
+  onFrame: (video: HTMLVideoElement) => void
+  isActive: boolean
 }
 
-export const Camera = ({ onFrame }: CameraProps) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const onFrameRef = useRef(onFrame);
-  onFrameRef.current = onFrame;
+export const Camera = ({ onFrame, isActive }: CameraProps) => {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+  const onFrameRef = useRef(onFrame)
+  onFrameRef.current = onFrame
 
   useEffect(() => {
-    let animationFrameId: number;
-    let stream: MediaStream;
+    let animationFrameId: number
+
+    const tick = () => {
+      if (videoRef.current && videoRef.current.readyState >= 2) {
+        onFrameRef.current(videoRef.current)
+      }
+      animationFrameId = requestAnimationFrame(tick)
+    }
 
     const startCamera = async () => {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
+        const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             width: { ideal: 1280 },
             height: { ideal: 720 },
             facingMode: 'user',
           },
-        });
+        })
+        streamRef.current = stream
         if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play();
-          tick();
+          videoRef.current.srcObject = stream
+          videoRef.current.play()
+          tick()
         }
       } catch (err) {
-        console.error('Error accessing camera:', err);
+        console.error('Error accessing camera:', err)
       }
-    };
+    }
 
-    const tick = () => {
-      if (videoRef.current && videoRef.current.readyState >= 2) {
-        onFrameRef.current(videoRef.current);
+    const stopCamera = () => {
+      cancelAnimationFrame(animationFrameId)
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop())
+        streamRef.current = null
       }
-      animationFrameId = requestAnimationFrame(tick);
-    };
+      if (videoRef.current) {
+        videoRef.current.srcObject = null
+      }
+    }
 
-    startCamera();
+    if (isActive) {
+      startCamera()
+    } else {
+      stopCamera()
+    }
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, []);
+      stopCamera()
+    }
+  }, [isActive])
 
   return (
     <video
@@ -55,6 +69,7 @@ export const Camera = ({ onFrame }: CameraProps) => {
       className="h-auto w-full rounded-lg"
       muted
       playsInline
+      autoPlay
     />
-  );
-};
+  )
+}
