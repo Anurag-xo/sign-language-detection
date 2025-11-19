@@ -1,26 +1,39 @@
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { predict } from '../../api/client'
-import { ResultCard } from '../ResultCard'
 import { Camera } from '../Camera'
 import { UploadFallback } from '../UploadFallback'
+import { PredictionPanel } from './PredictionPanel'
+import { InstructionsPanel } from './InstructionsPanel'
+import { CameraControls } from './CameraControls'
+
+const HISTORY_KEY = 'signlang-history'
 
 export const CameraCapture = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [prediction, setPrediction] = useState<{
-    label: string
-    confidence: number
-  } | null>(null)
+  const [predictions, setPredictions] = useState<
+    { label: string; confidence: number }[]
+  >([])
   const [isCameraActive, setIsCameraActive] = useState(false)
+
+  useEffect(() => {
+    const savedHistory = localStorage.getItem(HISTORY_KEY)
+    if (savedHistory) {
+      setPredictions(JSON.parse(savedHistory))
+    }
+  }, [])
 
   const predictMutation = useMutation({
     mutationFn: predict,
     onSuccess: (data) => {
-      setPrediction(data)
+      setPredictions((prev) => {
+        const newPredictions = [data, ...prev].slice(0, 100)
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(newPredictions))
+        return newPredictions
+      })
     },
     onError: (err) => {
       console.error('Prediction error:', err)
-      setPrediction(null)
     },
   })
 
@@ -48,40 +61,30 @@ export const CameraCapture = () => {
   }
 
   return (
-    <div className="flex flex-col items-center p-4">
-      <h2 className="mb-4 text-2xl font-bold">
-        Real-time Sign Language Detection
-      </h2>
-      <div className="relative w-full max-w-2xl overflow-hidden rounded-lg bg-gray-800 shadow-lg">
-        {isCameraActive ? (
-          <Camera onFrame={handleFrame} />
-        ) : (
-          <UploadFallback />
-        )}
-        <canvas ref={canvasRef} style={{ display: 'none' }} />
-        {predictMutation.isPending && (
-          <div className="bg-opacity-75 absolute inset-0 flex items-center justify-center bg-gray-900 text-xl text-white">
-            Detecting...
-          </div>
-        )}
-      </div>
-      <button
-        onClick={toggleCamera}
-        className="mt-4 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-      >
-        {isCameraActive ? 'Stop Camera' : 'Start Camera'}
-      </button>
-      {prediction && (
-        <ResultCard
-          label={prediction.label}
-          confidence={prediction.confidence}
+    <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+      <div className="md:col-span-2">
+        <div className="relative w-full overflow-hidden rounded-lg bg-card shadow-lg">
+          {isCameraActive ? (
+            <Camera onFrame={handleFrame} />
+          ) : (
+            <UploadFallback />
+          )}
+          <canvas ref={canvasRef} style={{ display: 'none' }} />
+          {predictMutation.isPending && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/80 text-xl">
+              Detecting...
+            </div>
+          )}
+        </div>
+        <CameraControls
+          isCameraActive={isCameraActive}
+          toggleCamera={toggleCamera}
         />
-      )}
-      {predictMutation.isError && (
-        <p className="mt-4 text-red-500">
-          Prediction Error: {predictMutation.error.message}
-        </p>
-      )}
+      </div>
+      <div className="space-y-8">
+        <PredictionPanel predictions={predictions} />
+        <InstructionsPanel />
+      </div>
     </div>
   )
 }
