@@ -65,7 +65,7 @@ export const CameraCapture = () => {
       <div className="md:col-span-2">
         <div className="relative w-full overflow-hidden rounded-lg bg-card shadow-lg">
           {isCameraActive ? (
-            <Camera onFrame={handleFrame} />
+            <Camera onFrame={handleFrame} isActive={isCameraActive} />
           ) : (
             <UploadFallback />
           )}
