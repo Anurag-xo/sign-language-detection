@@ -2,8 +2,8 @@ import { motion } from 'framer-motion'
 import { BarChart2 } from 'lucide-react'
 
 interface Prediction {
-  label: string
-  confidence: number
+  hand_sign: string
+  finger_gesture: string
 }
 
 interface PredictionPanelProps {
@@ -16,17 +16,6 @@ export const PredictionPanel = ({
   isLoading,
 }: PredictionPanelProps) => {
   const latestPrediction = predictions[0]
-
-  const renderConfidence = (confidence: number) => {
-    const percentage = (confidence * 100).toFixed(1)
-    let color = 'text-muted-foreground'
-    if (confidence > 0.75) {
-      color = 'text-success'
-    } else if (confidence > 0.5) {
-      color = 'text-warning'
-    }
-    return <span className={color}>{percentage}%</span>
-  }
 
   return (
     <div className="rounded-lg bg-card p-6 shadow-lg">
@@ -42,17 +31,16 @@ export const PredictionPanel = ({
         )}
         {!isLoading && latestPrediction && (
           <motion.div
-            key={latestPrediction.label}
+            key={`${latestPrediction.hand_sign}-${latestPrediction.finger_gesture}`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="h-24"
           >
-            <p className="text-5xl font-bold text-primary">
-              {latestPrediction.label}
+            <p className="text-4xl font-bold text-primary">
+              {latestPrediction.hand_sign || '-'}
             </p>
             <p className="mt-2 text-lg">
-              Confidence:{' '}
-              {renderConfidence(latestPrediction.confidence)}
+              {latestPrediction.finger_gesture || '-'}
             </p>
           </motion.div>
         )}
@@ -72,8 +60,8 @@ export const PredictionPanel = ({
                 key={i}
                 className="flex animate-fade-in items-center justify-between rounded-md bg-card p-2 shadow-sm"
               >
-                <span className="font-bold">{p.label}</span>
-                {renderConfidence(p.confidence)}
+                <span className="font-bold">{p.hand_sign || '-'}</span>
+                <span>{p.finger_gesture || '-'}</span>
               </li>
             ))
           ) : (
