@@ -1,7 +1,7 @@
 import { useTheme } from '../../hooks/useTheme'
 import { Sun, Moon, Trash2 } from 'lucide-react'
 
-const HISTORY_KEY = 'signlang-history'
+import { HISTORY_KEY } from '../../constants'
 
 export const SettingsPage = () => {
   const { isDarkMode, toggleTheme } = useTheme()

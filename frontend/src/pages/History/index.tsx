@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Trash2 } from 'lucide-react'
 
-const HISTORY_KEY = 'signlang-history'
+import { HISTORY_KEY } from '../../constants'
 
 interface Prediction {
   label: string

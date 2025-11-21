@@ -1,24 +1,21 @@
-import { QueryClient } from '@tanstack/react-query'
+import { QueryClient } from "@tanstack/react-query";
+import axios from "axios";
 
-export const queryClient = new QueryClient()
+export const queryClient = new QueryClient();
 
-export async function predict(
-  image: string,
-): Promise<{ label: string; confidence: number }> {
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/api/predict`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ image }),
-    },
-  )
+const apiClient = axios.create({
+  baseURL: "http://127.0.0.1:5000", // URL of the Python backend
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-  if (!response.ok) {
-    throw new Error('Network response was not ok')
+export const predictSign = async (imageBase64: string) => {
+  try {
+    const response = await apiClient.post("/predict", { image: imageBase64 });
+    return response.data;
+  } catch (error) {
+    console.error("Error predicting sign:", error);
+    throw error;
   }
-
-  return response.json()
-}
+};

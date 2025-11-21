@@ -1,26 +1,63 @@
 import { Link } from 'react-router-dom'
 import { Camera, CheckCircle, Zap, Cpu } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 export const HomePage = () => {
+  const heroVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        staggerChildren: 0.2,
+      },
+    },
+  }
+
+  const featureVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.5,
+      },
+    },
+  }
+
   return (
     <div className="flex flex-grow flex-col">
       {/* Hero Section */}
       <section className="py-24 text-center">
-        <div className="container mx-auto px-4">
-          <h1 className="mb-4 text-5xl font-extrabold tracking-tight md:text-6xl">
+        <motion.div
+          className="container mx-auto px-4"
+          variants={heroVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.h1
+            className="mb-4 text-5xl font-extrabold tracking-tight md:text-6xl"
+            variants={heroVariants}
+          >
             Real-time Sign Language Detection
-          </h1>
-          <p className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground md:text-xl">
+          </motion.h1>
+          <motion.p
+            className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground md:text-xl"
+            variants={heroVariants}
+          >
             Break communication barriers with our cutting-edge AI. Use your
             camera to translate sign language gestures into text, instantly.
-          </p>
-          <Link
-            to="/demo"
-            className="inline-block transform rounded-full bg-primary px-8 py-3 text-lg font-bold text-primary-foreground transition-transform hover:scale-105"
-          >
-            Start Demo
-          </Link>
-        </div>
+          </motion.p>
+          <motion.div variants={heroVariants}>
+            <Link
+              to="/demo"
+              className="inline-block transform rounded-full bg-primary px-8 py-3 text-lg font-bold text-primary-foreground transition-transform hover:scale-105"
+            >
+              Start Demo
+            </Link>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Features Section */}
@@ -30,29 +67,47 @@ export const HomePage = () => {
             Why Choose Us?
           </h2>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            <div className="transform rounded-lg bg-card p-8 text-center shadow-lg transition-transform hover:-translate-y-2">
+            <motion.div
+              className="transform rounded-lg bg-card p-8 text-center shadow-lg transition-transform hover:-translate-y-2"
+              variants={featureVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+            >
               <Zap className="mx-auto mb-4 h-12 w-12 text-primary" />
               <h3 className="mb-4 text-2xl font-bold">Real-time Detection</h3>
               <p className="text-muted-foreground">
                 Instantly detect and translate sign language gestures using your
                 webcam.
               </p>
-            </div>
-            <div className="transform rounded-lg bg-card p-8 text-center shadow-lg transition-transform hover:-translate-y-2">
+            </motion.div>
+            <motion.div
+              className="transform rounded-lg bg-card p-8 text-center shadow-lg transition-transform hover:-translate-y-2"
+              variants={featureVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+            >
               <CheckCircle className="mx-auto mb-4 h-12 w-12 text-primary" />
               <h3 className="mb-4 text-2xl font-bold">High Accuracy</h3>
               <p className="text-muted-foreground">
                 Powered by advanced machine learning models for precise
                 detection.
               </p>
-            </div>
-            <div className="transform rounded-lg bg-card p-8 text-center shadow-lg transition-transform hover:-translate-y-2">
+            </motion.div>
+            <motion.div
+              className="transform rounded-lg bg-card p-8 text-center shadow-lg transition-transform hover:-translate-y-2"
+              variants={featureVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+            >
               <Cpu className="mx-auto mb-4 h-12 w-12 text-primary" />
               <h3 className="mb-4 text-2xl font-bold">Easy to Use</h3>
               <p className="text-muted-foreground">
                 A simple and intuitive interface for a seamless user experience.
               </p>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
