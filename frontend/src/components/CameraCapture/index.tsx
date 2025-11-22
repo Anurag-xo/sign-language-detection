@@ -1,12 +1,11 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import Webcam from 'react-webcam'
-import { UploadFallback } from '../UploadFallback'
 import { PredictionPanel } from './PredictionPanel'
 import { InstructionsPanel } from './InstructionsPanel'
 import { CameraControls } from './CameraControls'
-import { AlertCircle } from 'lucide-react'
 import { useWebSocket } from '../../hooks/useWebSocket'
 import { HISTORY_KEY, WEBSOCKET_URL } from '../../constants'
+import { CameraView } from '../CameraView'
 
 // Define the structure of a single prediction
 interface Prediction {
@@ -99,34 +98,13 @@ export const CameraCapture = () => {
   return (
     <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
       <div className="md:col-span-2">
-        <div className="relative w-full overflow-hidden rounded-lg bg-card shadow-lg aspect-video">
-          {isCameraActive ? (
-            <Webcam
-              ref={webcamRef}
-              audio={false}
-              mirrored={true}
-              screenshotFormat="image/jpeg"
-              videoConstraints={{ facingMode }}
-              className="absolute top-0 left-0 w-full h-full object-cover"
-            />
-          ) : (
-            <UploadFallback />
-          )}
-          {error && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-destructive/80 text-destructive-foreground">
-              <AlertCircle className="h-12 w-12" />
-              <p className="mt-4 text-xl">{error}</p>
-            </div>
-          )}
-          {wsError && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-destructive/80 text-destructive-foreground">
-              <AlertCircle className="h-12 w-12" />
-              <p className="mt-4 text-xl">
-                WebSocket connection failed. Please try again.
-              </p>
-            </div>
-          )}
-        </div>
+        <CameraView
+          isCameraActive={isCameraActive}
+          webcamRef={webcamRef}
+          facingMode={facingMode}
+          error={error}
+          wsError={wsError}
+        />
         <CameraControls
           isCameraActive={isCameraActive}
           toggleCamera={toggleCamera}
