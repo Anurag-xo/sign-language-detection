@@ -6,12 +6,7 @@ import { CameraControls } from './CameraControls'
 import { useWebSocket } from '../../hooks/useWebSocket'
 import { HISTORY_KEY, WEBSOCKET_URL } from '../../constants'
 import { CameraView } from '../CameraView'
-
-// Define the structure of a single prediction
-interface Prediction {
-  hand_sign: string
-  finger_gesture: string
-}
+import { Prediction } from '../../types'
 
 export const CameraCapture = () => {
   const webcamRef = useRef<Webcam>(null)
