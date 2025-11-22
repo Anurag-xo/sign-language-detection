@@ -5,8 +5,8 @@ import { PredictionPanel } from './PredictionPanel'
 import { InstructionsPanel } from './InstructionsPanel'
 import { CameraControls } from './CameraControls'
 import { AlertCircle } from 'lucide-react'
-
-import { HISTORY_KEY } from '../../constants'
+import { useWebSocket } from '../../hooks/useWebSocket'
+import { HISTORY_KEY, WEBSOCKET_URL } from '../../constants'
 
 // Define the structure of a single prediction
 interface Prediction {
@@ -21,7 +21,6 @@ export const CameraCapture = () => {
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const ws = useRef<WebSocket | null>(null)
 
   // Load prediction history from local storage on component mount
   useEffect(() => {
@@ -31,16 +30,19 @@ export const CameraCapture = () => {
     }
   }, [])
 
-  const connectWebSocket = useCallback(() => {
-    ws.current = new WebSocket('ws://localhost:8000/ws')
-
-    ws.current.onopen = () => {
+  const {
+    isConnected,
+    error: wsError,
+    connect,
+    disconnect,
+    sendMessage,
+  } = useWebSocket(WEBSOCKET_URL, {
+    onOpen: () => {
       console.log('WebSocket connected')
       setError(null)
       setIsLoading(true)
-    }
-
-    ws.current.onmessage = (event) => {
+    },
+    onMessage: (event) => {
       const data = JSON.parse(event.data)
       if (data.hand_sign || data.finger_gesture) {
         setPredictions((prev) => {
@@ -50,43 +52,41 @@ export const CameraCapture = () => {
         })
       }
       setIsLoading(false)
-    }
-
-    ws.current.onerror = () => {
+    },
+    onError: () => {
       setError('WebSocket connection failed. Please try again.')
       setIsLoading(false)
-    }
-
-    ws.current.onclose = () => {
+    },
+    onClose: () => {
       console.log('WebSocket disconnected')
       setIsLoading(false)
-    }
-  }, [])
+    },
+  })
 
   // Capture a frame and send it for prediction
   const captureFrame = useCallback(() => {
-    if (ws.current?.readyState !== WebSocket.OPEN || !webcamRef.current) return
+    if (!isConnected || !webcamRef.current) return
 
     const imageSrc = webcamRef.current.getScreenshot()
     if (imageSrc) {
-      ws.current.send(imageSrc)
+      sendMessage(imageSrc)
     }
-  }, [])
+  }, [isConnected, sendMessage])
 
   // Set up an interval to capture frames when the camera is active
   useEffect(() => {
     let intervalId: NodeJS.Timeout
     if (isCameraActive) {
-      connectWebSocket()
+      connect()
       intervalId = setInterval(captureFrame, 500) // Capture every 500ms
     } else {
-      ws.current?.close()
+      disconnect()
     }
     return () => {
       clearInterval(intervalId)
-      ws.current?.close()
+      disconnect()
     }
-  }, [isCameraActive, captureFrame, connectWebSocket])
+  }, [isCameraActive, captureFrame, connect, disconnect])
 
   const toggleCamera = () => {
     setIsCameraActive(!isCameraActive)
@@ -116,6 +116,14 @@ export const CameraCapture = () => {
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-destructive/80 text-destructive-foreground">
               <AlertCircle className="h-12 w-12" />
               <p className="mt-4 text-xl">{error}</p>
+            </div>
+          )}
+          {wsError && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-destructive/80 text-destructive-foreground">
+              <AlertCircle className="h-12 w-12" />
+              <p className="mt-4 text-xl">
+                WebSocket connection failed. Please try again.
+              </p>
             </div>
           )}
         </div>
