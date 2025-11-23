@@ -5,6 +5,7 @@ import { FeatureCard } from '../../components/FeatureCard'
 import { HowItWorksStep } from '../../components/HowItWorksStep'
 
 export const HomePage = () => {
+  console.log('HomePage component is rendering')
   const heroVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: {

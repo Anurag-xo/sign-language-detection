@@ -52,5 +52,6 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    background-image: linear-gradient(to right, #ff7e5f, #feb47b);
   }
 }

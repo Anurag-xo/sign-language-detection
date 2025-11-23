@@ -9,6 +9,7 @@ import { HistoryPage } from './pages/History'
 import { SettingsPage } from './pages/Settings'
 
 function App() {
+  console.log('App component is rendering')
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
