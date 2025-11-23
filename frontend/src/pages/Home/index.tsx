@@ -1,57 +1,12 @@
-import { Link } from 'react-router-dom'
 import { Camera, CheckCircle, Zap, Cpu } from 'lucide-react'
-import { motion } from 'framer-motion'
 import { FeatureCard } from '../../components/FeatureCard'
 import { HowItWorksStep } from '../../components/HowItWorksStep'
+import { Hero } from '../../components/Hero'
 
 export const HomePage = () => {
-  console.log('HomePage component is rendering')
-  const heroVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        staggerChildren: 0.2,
-      },
-    },
-  }
-
   return (
     <div className="flex flex-grow flex-col">
-      {/* Hero Section */}
-      <section className="py-24 text-center">
-        <motion.div
-          className="container mx-auto px-4"
-          variants={heroVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.h1
-            className="mb-4 text-5xl font-extrabold tracking-tight md:text-6xl"
-            variants={heroVariants}
-          >
-            Real-time Sign Language Detection
-          </motion.h1>
-          <motion.p
-            className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground md:text-xl"
-            variants={heroVariants}
-          >
-            Break communication barriers with our cutting-edge AI. Use your
-            camera to translate sign language gestures into text, instantly.
-          </motion.p>
-          <motion.div variants={heroVariants}>
-            <Link
-              to="/demo"
-              className="inline-block transform rounded-full bg-primary px-8 py-3 text-lg font-bold text-primary-foreground transition-transform hover:scale-105"
-            >
-              Start Demo
-            </Link>
-          </motion.div>
-        </motion.div>
-      </section>
-
+      <Hero />
       {/* Features Section */}
       <section className="bg-secondary py-20">
         <div className="container mx-auto px-4">
