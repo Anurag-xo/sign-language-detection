@@ -95,7 +95,7 @@ export const CameraCapture = () => {
       <div className="md:col-span-2">
         <CameraView
           isCameraActive={isCameraActive}
-          webcamRef={webcamRef}
+          webcamRef={webcamRef as React.RefObject<Webcam>}
           facingMode={facingMode}
           error={error}
           wsError={wsError}
