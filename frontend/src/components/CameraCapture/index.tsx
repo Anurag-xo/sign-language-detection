@@ -1,26 +1,20 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import Webcam from 'react-webcam'
-import { useMutation } from '@tanstack/react-query'
-import { predictSign } from '../../api/client'
-import { UploadFallback } from '../UploadFallback'
 import { PredictionPanel } from './PredictionPanel'
 import { InstructionsPanel } from './InstructionsPanel'
 import { CameraControls } from './CameraControls'
-import { AlertCircle } from 'lucide-react'
-
-import { HISTORY_KEY } from '../../constants'
-
-// Define the structure of a single prediction
-interface Prediction {
-  label: string
-  confidence: number
-}
+import { useWebSocket } from '../../hooks/useWebSocket'
+import { HISTORY_KEY, WEBSOCKET_URL } from '../../constants'
+import { CameraView } from '../CameraView'
+import type { Prediction } from '../../types'
 
 export const CameraCapture = () => {
   const webcamRef = useRef<Webcam>(null)
   const [predictions, setPredictions] = useState<Prediction[]>([])
   const [isCameraActive, setIsCameraActive] = useState(false)
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user')
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   // Load prediction history from local storage on component mount
   useEffect(() => {
@@ -30,43 +24,63 @@ export const CameraCapture = () => {
     }
   }, [])
 
-  const predictMutation = useMutation({
-    mutationFn: predictSign,
-    onSuccess: (data: Prediction[]) => {
-      // Add new prediction to the beginning of the array if it's not empty
-      if (data && data.length > 0) {
+  const {
+    isConnected,
+    error: wsError,
+    connect,
+    disconnect,
+    sendMessage,
+  } = useWebSocket(WEBSOCKET_URL, {
+    onOpen: () => {
+      console.log('WebSocket connected')
+      setError(null)
+      setIsLoading(true)
+    },
+    onMessage: (event) => {
+      const data = JSON.parse(event.data)
+      if (data.hand_sign || data.finger_gesture) {
         setPredictions((prev) => {
-          const newPredictions = [...data, ...prev].slice(0, 100) // Keep last 100
+          const newPredictions = [data, ...prev].slice(0, 100) // Keep last 100
           localStorage.setItem(HISTORY_KEY, JSON.stringify(newPredictions))
           return newPredictions
         })
       }
+      setIsLoading(false)
     },
-    onError: (err) => {
-      console.error('Prediction error:', err)
+    onError: () => {
+      setError('WebSocket connection failed. Please try again.')
+      setIsLoading(false)
+    },
+    onClose: () => {
+      console.log('WebSocket disconnected')
+      setIsLoading(false)
     },
   })
 
   // Capture a frame and send it for prediction
   const captureFrame = useCallback(() => {
-    if (predictMutation.isPending || !webcamRef.current) return
+    if (!isConnected || !webcamRef.current) return
 
     const imageSrc = webcamRef.current.getScreenshot()
     if (imageSrc) {
-      predictMutation.mutate(imageSrc)
+      sendMessage(imageSrc)
     }
-  }, [predictMutation])
+  }, [isConnected, sendMessage])
 
   // Set up an interval to capture frames when the camera is active
   useEffect(() => {
     let intervalId: NodeJS.Timeout
     if (isCameraActive) {
+      connect()
       intervalId = setInterval(captureFrame, 500) // Capture every 500ms
+    } else {
+      disconnect()
     }
     return () => {
       clearInterval(intervalId)
+      disconnect()
     }
-  }, [isCameraActive, captureFrame])
+  }, [isCameraActive, captureFrame, connect, disconnect])
 
   const toggleCamera = () => {
     setIsCameraActive(!isCameraActive)
@@ -79,28 +93,13 @@ export const CameraCapture = () => {
   return (
     <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
       <div className="md:col-span-2">
-        <div className="relative w-full overflow-hidden rounded-lg bg-card shadow-lg aspect-video">
-          {isCameraActive ? (
-            <Webcam
-              ref={webcamRef}
-              audio={false}
-              mirrored={true}
-              screenshotFormat="image/jpeg"
-              videoConstraints={{ facingMode }}
-              className="absolute top-0 left-0 w-full h-full object-cover"
-            />
-          ) : (
-            <UploadFallback />
-          )}
-          {predictMutation.isError && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-destructive/80 text-destructive-foreground">
-              <AlertCircle className="h-12 w-12" />
-              <p className="mt-4 text-xl">
-                Prediction failed. Please try again.
-              </p>
-            </div>
-          )}
-        </div>
+        <CameraView
+          isCameraActive={isCameraActive}
+          webcamRef={webcamRef as React.RefObject<Webcam>}
+          facingMode={facingMode}
+          error={error}
+          wsError={wsError}
+        />
         <CameraControls
           isCameraActive={isCameraActive}
           toggleCamera={toggleCamera}
@@ -110,7 +109,7 @@ export const CameraCapture = () => {
       <div className="space-y-8">
         <PredictionPanel
           predictions={predictions}
-          isLoading={predictMutation.isPending}
+          isLoading={isLoading}
         />
         <InstructionsPanel />
       </div>

@@ -1,12 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Trash2 } from 'lucide-react'
-
 import { HISTORY_KEY } from '../../constants'
-
-interface Prediction {
-  label: string
-  confidence: number
-}
+import type { Prediction } from '../../types'
 
 export const HistoryPage = () => {
   const [history, setHistory] = useState<Prediction[]>([])
@@ -43,9 +38,9 @@ export const HistoryPage = () => {
                 key={i}
                 className="flex items-center justify-between rounded-md bg-secondary p-4"
               >
-                <span className="text-lg font-bold">{p.label}</span>
+                <span className="text-lg font-bold">{p.hand_sign}</span>
                 <span className="text-muted-foreground">
-                  {(p.confidence * 100).toFixed(2)}%
+                  {p.finger_gesture}
                 </span>
               </li>
             ))}
