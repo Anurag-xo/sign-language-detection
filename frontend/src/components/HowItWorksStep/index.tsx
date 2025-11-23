@@ -8,7 +8,6 @@ interface HowItWorksStepProps {
 }
 
 export const HowItWorksStep = ({
-  icon: Icon,
   title,
   description,
   stepNumber,
