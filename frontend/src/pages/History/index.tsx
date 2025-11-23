@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Trash2 } from 'lucide-react'
 import { HISTORY_KEY } from '../../constants'
-import { Prediction } from '../../types'
+import type { Prediction } from '../../types'
 
 export const HistoryPage = () => {
   const [history, setHistory] = useState<Prediction[]>([])

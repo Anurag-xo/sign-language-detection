@@ -6,7 +6,7 @@ import { CameraControls } from './CameraControls'
 import { useWebSocket } from '../../hooks/useWebSocket'
 import { HISTORY_KEY, WEBSOCKET_URL } from '../../constants'
 import { CameraView } from '../CameraView'
-import { Prediction } from '../../types'
+import type { Prediction } from '../../types'
 
 export const CameraCapture = () => {
   const webcamRef = useRef<Webcam>(null)
