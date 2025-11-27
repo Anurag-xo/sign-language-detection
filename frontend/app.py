@@ -277,4 +277,4 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         print("Client disconnected")
 
-app.mount("/", StaticFiles(directory="frontend/dist", html=True), name="static")
+app.mount("/", StaticFiles(directory="dist", html=True), name="static")
