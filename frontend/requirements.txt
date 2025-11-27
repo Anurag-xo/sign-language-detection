@@ -3,5 +3,4 @@ mediapipe
 tensorflow
 numpy
 fastapi
-uvicorn
-websockets
+uvicorn[standard]
