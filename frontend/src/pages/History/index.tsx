@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Trash2 } from 'lucide-react'
 import { HISTORY_KEY } from '../../constants'
 import type { Prediction } from '../../types'
@@ -14,42 +15,60 @@ export const HistoryPage = () => {
   }, [])
 
   const clearHistory = () => {
-    localStorage.removeItem(HISTORY_KEY)
-    setHistory([])
+    if (window.confirm('Are you sure you want to clear the history?')) {
+      localStorage.removeItem(HISTORY_KEY)
+      setHistory([])
+    }
   }
 
   return (
     <div className="container mx-auto p-4">
       <div className="flex items-center justify-between">
         <h1 className="mb-4 text-3xl font-bold">Prediction History</h1>
-        <button
+        <motion.button
           onClick={clearHistory}
           className="flex items-center rounded-full bg-destructive px-4 py-2 font-bold text-destructive-foreground hover:bg-destructive/90"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           <Trash2 className="mr-2 h-5 w-5" />
           Clear History
-        </button>
+        </motion.button>
       </div>
       <div className="mt-8 rounded-lg bg-card p-6 shadow-lg">
-        {history.length > 0 ? (
-          <ul className="space-y-4">
-            {history.map((p, i) => (
-              <li
-                key={i}
-                className="flex items-center justify-between rounded-md bg-secondary p-4"
-              >
-                <span className="text-lg font-bold">{p.hand_sign}</span>
-                <span className="text-muted-foreground">
-                  {p.finger_gesture}
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-center text-muted-foreground">
-            No history yet. Go to the demo page to make some predictions.
-          </p>
-        )}
+        <AnimatePresence>
+          {history.length > 0 ? (
+            <motion.ul
+              className="space-y-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              {history.map((p, i) => (
+                <motion.li
+                  key={i}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  layout
+                  className="flex items-center justify-between rounded-md bg-secondary p-4"
+                >
+                  <span className="text-lg font-bold">{p.hand_sign}</span>
+                  <span className="text-muted-foreground">
+                    {p.finger_gesture}
+                  </span>
+                </motion.li>
+              ))}
+            </motion.ul>
+          ) : (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center text-muted-foreground"
+            >
+              No history yet. Go to the demo page to make some predictions.
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )

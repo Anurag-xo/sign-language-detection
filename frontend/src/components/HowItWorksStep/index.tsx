@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
 
 interface HowItWorksStepProps {
@@ -12,8 +13,25 @@ export const HowItWorksStep = ({
   description,
   stepNumber,
 }: HowItWorksStepProps) => {
+  const stepVariants = {
+    hidden: { opacity: 0, x: -50 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.5,
+      },
+    },
+  }
+
   return (
-    <div className="flex items-center space-x-4">
+    <motion.div
+      className="flex items-center space-x-4"
+      variants={stepVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+    >
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
         <span className="text-2xl font-bold">{stepNumber}</span>
       </div>
@@ -21,6 +39,6 @@ export const HowItWorksStep = ({
         <h3 className="text-xl font-bold">{title}</h3>
         <p className="text-muted-foreground">{description}</p>
       </div>
-    </div>
+    </motion.div>
   )
 }
